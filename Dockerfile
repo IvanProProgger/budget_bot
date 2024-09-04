@@ -18,12 +18,12 @@ COPY --from=builder /usr/local/lib/python3.12/site-packages/ /usr/local/lib/pyth
 COPY --from=builder /app /app
 
 RUN rm -rf /var/cache/apt/* /root/.cache/pip/ \
-    && rm -rf $(find /app -name "__pycache__")
+#    && rm -rf $(find /app -name "**/__pycache__/")
 
 COPY . .
 
 ENV PYTHONPATH="/app:$PYTHONPATH"
 
-ENTRYPOINT ["python3.12"]
+ENTRYPOINT ["python"]
 
 CMD ["budget_bot/main.py"]
