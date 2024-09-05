@@ -3,7 +3,7 @@ import textwrap
 from datetime import datetime
 
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import CallbackContext, ContextTypes
+from telegram.ext import ContextTypes
 
 from config.config import Config
 from config.logging_config import logger
@@ -11,7 +11,7 @@ from db import db
 from budget_bot.sheets import GoogleSheetsManager
 
 
-async def chat_ids_department(department) -> list[str]:
+async def chat_ids_department(department: str) -> list[int]:
     """Возвращяет chat_id для подгрупп"""
 
     chat_ids = {
@@ -47,9 +47,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     )
 
 
-async def submit_record_command(
-        update: Update, context: ContextTypes.DEFAULT_TYPE
-) -> None:
+async def submit_record_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Обработчик введённого пользователем платежа в соответствии с паттерном:
     1)Сумма счёта: положительное число (возможно с плавающей точкой)
@@ -88,6 +86,7 @@ async def submit_record_command(
                  "6)Форма оплаты: любая строка из букв и цифр\n"
                  "7)Комментарий к платежу: любая строка из букв и цифр\n"
         )
+        return
 
     try:
         period_dates = match.group(6).split()
@@ -119,7 +118,7 @@ async def submit_record_command(
 
     try:
         async with db:
-            approval_id = await db.insert_record(record_dict)
+            approval_id: int = await db.insert_record(record_dict)
     except Exception as e:
         raise RuntimeError(f"Произошла ошибка при добавлении счёта в базу данных. {e}")
 
@@ -160,10 +159,10 @@ async def reject_record_command(
 
 
 async def create_and_send_approval_message(
-        approval_id,
-        initiator_chat_id,
-        record,
-        department,
+        approval_id: str | int,
+        initiator_chat_id: str | int,
+        record: dict,
+        department: str,
         context: ContextTypes.DEFAULT_TYPE,
 ) -> None:
     """Создание кнопок "Одобрить" и "Отклонить", создание и отправка сообщения для одобрения заявки."""
@@ -198,7 +197,7 @@ async def create_and_send_approval_message(
 
 
 async def create_and_send_payment_message(
-        approval_id, approved_users, record, context: ContextTypes.DEFAULT_TYPE
+        approval_id: str, approved_users: str, record: dict, context: ContextTypes.DEFAULT_TYPE
 ) -> None:
     """
     Создание кнопок "Оплачено",
@@ -218,7 +217,7 @@ async def create_and_send_payment_message(
     await send_message_to_chats(chat_ids, message_text, context, reply_markup)
 
 
-async def send_message_to_chats(chat_ids, text, context, reply_markup=None):
+async def send_message_to_chats(chat_ids: list[int], text: str, context: ContextTypes.DEFAULT_TYPE, reply_markup=None):
     """Отправка сообщения в выбранные телеграм-чаты."""
 
     for chat_id in chat_ids:
@@ -227,7 +226,7 @@ async def send_message_to_chats(chat_ids, text, context, reply_markup=None):
         )
 
 
-async def add_record_to_google_sheet(record) -> None:
+async def add_record_to_google_sheet(record: dict) -> None:
     """Функция для добавления строки в таблицу Google Sheet."""
 
     manager = GoogleSheetsManager()
@@ -303,13 +302,13 @@ async def process_approval(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
 
 async def handle_head_approval(
-        context,
-        approval_id,
-        initiator_id,
-        approved_users,
-        record,
-        department,
-        action,
+        context: ContextTypes.DEFAULT_TYPE,
+        approval_id: str,
+        initiator_id: str,
+        approved_users: str,
+        record: dict,
+        department: str,
+        action: str,
         update: Update,
 ) -> None:
     """Обработчик заявок для одобрения или отклонения."""
@@ -337,8 +336,8 @@ async def handle_head_approval(
 
 
 async def reject_payment(
-        context, approval_id, initiator_id, approved_users, department, update: Update
-) -> None:
+        context: ContextTypes.DEFAULT_TYPE, approval_id: str, initiator_id: str, approved_users: str, department: str,
+        update: Update) -> None:
     """Отправка сообщения об отклонении платежа и изменение статуса платежа."""
 
     if department == "finance":
@@ -378,12 +377,12 @@ async def reject_payment(
 
 
 async def approve_payment(
-        context,
-        approval_id,
-        initiator_id,
-        approved_users,
-        record,
-        department,
+        context: ContextTypes.DEFAULT_TYPE,
+        approval_id: str,
+        initiator_id: str,
+        approved_users: str,
+        record: dict,
+        department: str,
         update: Update,
 ):
     """
@@ -463,7 +462,7 @@ async def approve_payment(
         )
 
 
-async def error_callback(update: Update, context: CallbackContext) -> None:
+async def error_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обработчик ошибок для логирования и уведомления пользователя с детальной информацией об ошибке."""
 
     error_text = str(context.error)
@@ -481,7 +480,7 @@ async def error_callback(update: Update, context: CallbackContext) -> None:
             return
 
 
-async def show_not_paid(update: Update) -> None:
+async def show_not_paid(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Возвращает все неоплаченные заявки на платежи из таблицы "approvals"
     """

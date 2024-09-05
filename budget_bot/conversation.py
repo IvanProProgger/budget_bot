@@ -1,6 +1,7 @@
 import re
 from datetime import datetime
 
+from typing import List, Optional
 from telegram import Update, ForceReply, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ConversationHandler, ContextTypes
 
@@ -19,10 +20,10 @@ from budget_bot.sheets import GoogleSheetsManager
     CONFIRM_COMMAND,
 ) = range(8)
 
-payment_types = ["нал", "безнал", "крипта"]
+payment_types: List[str] = ["нал", "безнал", "крипта"]
 
 
-async def create_keyboard(massive):
+async def create_keyboard(massive: List[str]) -> InlineKeyboardMarkup:
     """Функция для создания клавиатуры. Каждый кнопка создаётся с новой строки."""
     keyboard = []
 
@@ -249,7 +250,7 @@ async def input_dates(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
     return INPUT_PAYMENT_TYPE
 
 
-async def input_payment_type(update: Update, context: ContextTypes) -> int:
+async def input_payment_type(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Обработчик выбора типа оплаты и создание итогового сообщения для подтверждения или отклонения заявки на платёж"""
     query = update.callback_query
     await query.answer()
