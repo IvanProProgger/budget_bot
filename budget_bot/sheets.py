@@ -18,7 +18,7 @@ currency_format = {  # паттерн для преобразования чис
 }
 
 
-async def get_today_moscow_time():
+async def get_today_moscow_time() -> str:
     """Функция для получения текущей даты"""
 
     moscow_tz = pytz.timezone("Europe/Moscow")
@@ -27,7 +27,7 @@ async def get_today_moscow_time():
     return formatted_date
 
 
-def get_credentials():
+def get_credentials() -> Credentials:
     """Функция для получения данных для авторизации в Google Sheets"""
 
     creds = Credentials.from_service_account_file(Config.google_sheets_credentials_file)
@@ -52,8 +52,9 @@ class GoogleSheetsManager:
         self.items = None
         self.agc = None
 
-    async def initialize_google_sheets(self):
+    async def initialize_google_sheets(self) -> gspread_asyncio.AsyncioGspreadClient:
         """Инициализация в Google Sheets"""
+
         try:
             agcm = gspread_asyncio.AsyncioGspreadClientManager(get_credentials)
             self.agc = await agcm.authorize()
@@ -61,7 +62,7 @@ class GoogleSheetsManager:
         except Exception as e:
             raise RuntimeError(f"Не удалось авторизоваться в сервисе Google Sheet. Ошибка: {e}")
 
-    async def add_payment_to_sheet(self, payment_info):
+    async def add_payment_to_sheet(self, payment_info: dict[str, str]) -> None:
         """Добавление счёта в таблицу"""
 
         try:
@@ -97,10 +98,11 @@ class GoogleSheetsManager:
         await worksheet.format("B3:B", currency_format)
         await worksheet.format("G3:G", date_format)
 
-    async def get_data(self):
+    async def get_data(self) -> tuple[dict[str, dict[str, list[str]]], list[str]]:
         """
         Получение списка статей и списка словарей данных из таблицы "категории"
         """
+
         try:
             spreadsheet = await self.agc.open_by_key(self.sheets_spreadsheet_id)
             worksheet = await spreadsheet.get_worksheet_by_id(self.categories_sheet_id)

@@ -1,6 +1,5 @@
 import aiosqlite
 
-
 from config.config import Config
 from config.logging_config import logger
 
@@ -11,19 +10,21 @@ class ApprovalDB:
     def __init__(self):
         self.db_file = Config.database_path
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> 'ApprovalDB':
         self._conn = await aiosqlite.connect(self.db_file)
         self._cursor = await self._conn.cursor()
         logger.info("Connected to database.")
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
+    async def __aexit__(self, exc_type: any, exc_val: any, exc_tb: any) -> bool:
+        if exc_type:
+            logger.error(f"Произошла ошибка: {exc_type}; {exc_val}; {exc_tb}")
         if self._conn:
             await self._conn.close()
             logger.info("Disconnected from database.")
         return True
 
-    async def create_table(self):
+    async def create_table(self) -> None:
         """Создает таблицу 'approvals', если она еще не существует."""
         async with self:
             await self._cursor.execute(
@@ -56,9 +57,15 @@ class ApprovalDB:
                 logger.info("Таблица 'approvals' уже существует.")
 
 
-    async def insert_record(self, record):
+    async def insert_record(self, record: dict[str, any]) -> int:
         """
-        Вставляет новую запись в таблицу 'approvals'.
+        Добавляет новую запись в таблицу 'approvals'.
+
+        Args:
+            record (dict[str, any]): Словарь с данными для вставки.
+
+        Returns:
+            int: ID вставленной записи.
         """
         try:
             await self._cursor.execute(
@@ -67,12 +74,13 @@ class ApprovalDB:
                 list(record.values()),
             )
             await self._conn.commit()
-            logger.info("Record inserted successfully.")
+            logger.info("Запись добавлена успешно.")
             return self._cursor.lastrowid
         except Exception as e:
-            raise RuntimeError(f"Failed to insert record: {e}")
+            raise RuntimeError(f"Не удалось добавить запись: {e}")
 
-    async def get_row_by_id(self, row_id):
+    async def get_row_by_id(self, row_id: int) -> dict[str, any] | None:
+        """Получаем словарь из названий и значений столбцов по id"""
         try:
             result = await self._cursor.execute(
                 "SELECT * FROM approvals WHERE id=?", (row_id,)
@@ -80,7 +88,7 @@ class ApprovalDB:
             row = await result.fetchone()
             if row is None:
                 return None
-            logger.info("Row data received successfully")
+            logger.info("Данные строки получены успешно")
             return dict(
                 zip(
                     (
@@ -101,9 +109,11 @@ class ApprovalDB:
                 )
             )
         except Exception as e:
-            raise RuntimeError(f"Failed to fetch record: {e}")
+            raise RuntimeError(f"Не удалось получить запись: {e}")
 
-    async def update_row_by_id(self, row_id, updates):
+    async def update_row_by_id(self, row_id: int, updates: dict[str, any]) -> None:
+        """Функция меняет значения столбцов.
+        :param принимает id строки row_id и словарь updates из названий и значений столбцов"""
         try:
             await self._cursor.execute(
                 "UPDATE approvals SET {} WHERE id = ?".format(
@@ -112,11 +122,12 @@ class ApprovalDB:
                 list(updates.values()) + [row_id],
             )
             await self._conn.commit()
-            logger.info("Record updated successfully.")
+            logger.info("Запись обновлена успешно.")
         except Exception as e:
-            raise RuntimeError(f"Failed to update record: {e}. Approval ID: {row_id}, Updates: {updates}")
+            raise RuntimeError(f"Не удалось обновить запись: {e}. ID заявки: {row_id}, Обновления: {updates}")
 
-    async def find_not_paid(self):
+    async def find_not_paid(self) -> list[dict[str, str]]:
+        """Функция возвращает все данные по всем неоплаченным заявкам на платёж"""
         try:
             result = await self._cursor.execute(
                 "SELECT * FROM approvals WHERE status != ? AND status != ?",
@@ -125,7 +136,7 @@ class ApprovalDB:
             rows = await result.fetchall()
             if not rows:
                 return []
-            logger.info("Not paid records found successfully.")
+            logger.info("Неоплаченные записи успешно найдены.")
 
             return [
                 dict(
@@ -150,4 +161,4 @@ class ApprovalDB:
                 for row in rows
             ]
         except Exception as e:
-            raise RuntimeError(f"Failed to fetch records: {e}")
+            raise RuntimeError(f"Не удалось получить записи: {e}")

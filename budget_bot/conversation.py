@@ -1,7 +1,6 @@
 import re
 from datetime import datetime
 
-from typing import List, Optional
 from telegram import Update, ForceReply, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ConversationHandler, ContextTypes
 
@@ -9,21 +8,23 @@ from config.logging_config import logger
 from budget_bot.handlers import submit_record_command
 from budget_bot.sheets import GoogleSheetsManager
 
-(
-    INPUT_SUM,
-    INPUT_ITEM,
-    INPUT_GROUP,
-    INPUT_PARTNER,
-    INPUT_COMMENT,
-    INPUT_DATES,
-    INPUT_PAYMENT_TYPE,
-    CONFIRM_COMMAND,
-) = range(8)
+from main import INPUT_SUM, INPUT_ITEM, INPUT_GROUP, INPUT_PARTNER, INPUT_COMMENT, INPUT_DATES, INPUT_PAYMENT_TYPE, CONFIRM_COMMAND
 
-payment_types: List[str] = ["нал", "безнал", "крипта"]
+# (
+#     INPUT_SUM,
+#     INPUT_ITEM,
+#     INPUT_GROUP,
+#     INPUT_PARTNER,
+#     INPUT_COMMENT,
+#     INPUT_DATES,
+#     INPUT_PAYMENT_TYPE,
+#     CONFIRM_COMMAND,
+# ) = range(8)
+
+payment_types: list[str] = ["нал", "безнал", "крипта"]
 
 
-async def create_keyboard(massive: List[str]) -> InlineKeyboardMarkup:
+async def create_keyboard(massive: list[str]) -> InlineKeyboardMarkup:
     """Функция для создания клавиатуры. Каждый кнопка создаётся с новой строки."""
     keyboard = []
 
@@ -232,8 +233,8 @@ async def input_dates(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
 
     except Exception:
         await update.message.reply_text(
-            f"Неверный формат дат. Введите даты начисления платежей в формате mm.yy строго через"
-            " пробел",
+            f'Неверный формат дат. Введите даты начисления платежей в формате mm.yy строго через'
+            ' пробел(например: "03.21 07.21 12.22"). Попробуйте ещё раз.',
             reply_markup=ForceReply(selective=True),
         )
         return INPUT_DATES
