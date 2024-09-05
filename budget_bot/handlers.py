@@ -25,12 +25,11 @@ async def chat_ids_department(department: str) -> list[int]:
     return chat_ids[department]
 
 
-async def restricted(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Проверяет, находится ли пользователь в белом списке."""
-    user_id = update.effective_user.id
-
-    if user_id in Config.white_list:
+async def check_access(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    logger.info(update.effective_user.id)
+    if update.effective_user.id not in Config.white_list:
         await update.message.reply_text("Извините, у вас нет доступа к этому боту.")
+        logger.warning("В чат пытаются зайти посторонние")
         return
 
 

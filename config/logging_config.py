@@ -9,6 +9,7 @@ LOG_FILE = os.path.join(LOG_DIR, "app.log")
 MAX_SIZE = 10 * 1024 * 1024
 MAX_FILES = 5
 
+
 def configure_logging(max_bytes=MAX_SIZE, backup_count=MAX_FILES):
     """Обработчик логгирования в проекте"""
     # Создаем обработчик файлового логгера
