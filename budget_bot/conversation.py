@@ -8,18 +8,16 @@ from config.logging_config import logger
 from budget_bot.handlers import submit_record_command
 from budget_bot.sheets import GoogleSheetsManager
 
-from main import INPUT_SUM, INPUT_ITEM, INPUT_GROUP, INPUT_PARTNER, INPUT_COMMENT, INPUT_DATES, INPUT_PAYMENT_TYPE, CONFIRM_COMMAND
-
-# (
-#     INPUT_SUM,
-#     INPUT_ITEM,
-#     INPUT_GROUP,
-#     INPUT_PARTNER,
-#     INPUT_COMMENT,
-#     INPUT_DATES,
-#     INPUT_PAYMENT_TYPE,
-#     CONFIRM_COMMAND,
-# ) = range(8)
+(
+    INPUT_SUM,
+    INPUT_ITEM,
+    INPUT_GROUP,
+    INPUT_PARTNER,
+    INPUT_COMMENT,
+    INPUT_DATES,
+    INPUT_PAYMENT_TYPE,
+    CONFIRM_COMMAND,
+) = range(8)
 
 payment_types: list[str] = ["нал", "безнал", "крипта"]
 
