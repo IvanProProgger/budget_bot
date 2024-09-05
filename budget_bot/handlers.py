@@ -25,25 +25,34 @@ async def chat_ids_department(department: str) -> list[int]:
     return chat_ids[department]
 
 
+async def restricted(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Проверяет, находится ли пользователь в белом списке."""
+    user_id = update.effective_user.id
+
+    if user_id in Config.white_list:
+        await update.message.reply_text("Извините, у вас нет доступа к этому боту.")
+        return
+
+
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обработчик команды /start."""
 
     await update.message.reply_text(
-        f"<b>Бот по автоматизации заполнения бюджета</b>\n"
-        "<i>Отправьте команду /enter_record и укажите:</i>\n"
-        "<i>1)Сумма счёта</i>\n"
-        "<i>2)Статья расхода</i>\n"
-        "<i>3)Группа расхода</i>\n"
-        "<i>4)Партнёр</i>\n"
-        "<i>5)Дата оплаты и дата начисления платежа через пробел</i>\n"
-        "<i>6)Форма оплаты</i>\n"
-        "<i>7)Комментарий к платежу</i>\n"
-        "<i>Каждый пункт необходимо указывать строго через запятую.</i>\n\n"
-        "<i>Вы можете просмотреть необработанные заявки командой /show_not_processed</i>\n\n"
-        "<i>Одобрить заявку можно командой /approve_record указав id заявки</i>\n\n"
-        "<i>Отклонить заявку можно командой /reject_record указав id заявки</i>\n\n"
-        f"<i>Ваш chat_id - {update.message.chat_id}</i>",
-        parse_mode="HTML",
+    f"<b>Бот по автоматизации заполнения бюджета</b>\n"
+    "<i>Отправьте команду /enter_record и укажите:</i>\n"
+    "<i>1)Сумма счёта</i>\n"
+    "<i>2)Статья расхода</i>\n"
+    "<i>3)Группа расхода</i>\n"
+    "<i>4)Партнёр</i>\n"
+    "<i>5)Дата оплаты и дата начисления платежа через пробел</i>\n"
+    "<i>6)Форма оплаты</i>\n"
+    "<i>7)Комментарий к платежу</i>\n"
+    "<i>Каждый пункт необходимо указывать строго через запятую.</i>\n\n"
+    "<i>Вы можете просмотреть необработанные заявки командой /show_not_processed</i>\n\n"
+    "<i>Одобрить заявку можно командой /approve_record указав id заявки</i>\n\n"
+    "<i>Отклонить заявку можно командой /reject_record указав id заявки</i>\n\n"
+    f"<i>Ваш chat_id - {update.message.chat_id}</i>",
+    parse_mode="HTML"
     )
 
 

@@ -17,3 +17,4 @@ class Config:
     finance_chat_ids: list[int] = list(map(int, getenv("FINANCE_CHAT_IDS").split(",")))
     payers_chat_ids: list[int] = list(map(int, getenv("PAYERS_CHAT_IDS").split(",")))
     developer_chat_id: list[int] = getenv("DEVELOPER_CHAT_ID")
+    white_list: list[int] = list(map(int, getenv("WHITE_LIST").split(",")))

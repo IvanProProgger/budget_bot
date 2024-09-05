@@ -22,6 +22,7 @@ from budget_bot.conversation import (
     stop_dialog,
 )
 from budget_bot.handlers import (
+    restricted,
     start_command,
     submit_record_command,
     error_callback,
@@ -46,6 +47,7 @@ from budget_bot.handlers import (
 def main() -> None:
     """Основная функция для запуска бота."""
     application = Application.builder().token(Config.telegram_bot_token).build()
+    application.add_handler(MessageHandler(filters.COMMAND, restricted))
     application.add_handler(CommandHandler("start", start_command))
     application.add_handler(CommandHandler("submit_record", submit_record_command))
     application.add_handler(CommandHandler("reject_record", reject_record_command))
